@@ -1,6 +1,6 @@
-import { Globe } from 'iqons-react';
+import { Globe } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function GlobeIcon({ size = 24, className = '' }: Props) {
-  return <Globe variant="duotone" size={size} className={className} />;
+  return <Globe size={size} className={className} />;
 }

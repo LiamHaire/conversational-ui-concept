@@ -7,7 +7,8 @@
  */
 
 import { motion } from 'framer-motion';
-import { IQChatIcon } from '@/components/icons';
+import { IQChatIcon, BrandMarkAIIcon } from '@/components/icons';
+import { ThinkingText } from './ThinkingText';
 import { AdaptiveCardRenderer } from './AdaptiveCardRenderer';
 import { MessageToolbar } from './MessageToolbar';
 import { GameOptions } from './GameOptions';
@@ -70,13 +71,8 @@ export function AssistantMessage({
       transition={{ duration: 0.3 }}
     >
       {isLoading ? (
-        /* Loading State - Centered with Icon */
-        <div className="flex items-center gap-2">
-          <IQChatIcon size={24} />
-          <div className="text-text-secondary text-sm">
-            Working on it...
-          </div>
-        </div>
+        /* Loading State */
+        <ThinkingText />
       ) : (
         /* Normal Message - Text content edge-to-edge without icon */
         <div>

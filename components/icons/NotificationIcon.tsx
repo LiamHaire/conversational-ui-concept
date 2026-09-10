@@ -1,6 +1,6 @@
-import { Notifications } from 'iqons-react';
+import { Bell } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function NotificationIcon({ size = 24, className = '' }: Props) {
-  return <Notifications variant="duotone" size={size} className={className} />;
+  return <Bell size={size} className={className} />;
 }

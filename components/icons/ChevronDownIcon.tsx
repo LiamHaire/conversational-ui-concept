@@ -1,6 +1,6 @@
-import { ChevronDown } from 'iqons-react';
+import { CaretDown } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function ChevronDownIcon({ size = 24, className = '' }: Props) {
-  return <ChevronDown variant="duotone" size={size} className={className} />;
+  return <CaretDown size={size} className={className} />;
 }

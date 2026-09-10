@@ -1,6 +1,6 @@
-import { Menu } from 'iqons-react';
+import { List } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function MenuIcon({ size = 24, className = '' }: Props) {
-  return <Menu variant="duotone" size={size} className={className} />;
+  return <List size={size} className={className} />;
 }

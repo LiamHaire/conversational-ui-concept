@@ -1,6 +1,6 @@
-import { MoreVertical } from 'iqons-react';
+import { DotsThreeVertical } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function MoreVerticalIcon({ size = 24, className = '' }: Props) {
-  return <MoreVertical variant="duotone" size={size} className={className} />;
+  return <DotsThreeVertical size={size} className={className} />;
 }

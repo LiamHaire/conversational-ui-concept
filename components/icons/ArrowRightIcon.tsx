@@ -1,6 +1,6 @@
-import { ArrowRight } from 'iqons-react';
+import { ArrowRight } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function ArrowRightIcon({ size = 24, className = '' }: Props) {
-  return <ArrowRight variant="duotone" size={size} className={className} />;
+  return <ArrowRight size={size} className={className} />;
 }

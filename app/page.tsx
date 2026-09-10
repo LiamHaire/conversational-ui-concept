@@ -184,7 +184,8 @@ export default function Home() {
     // Get mock response
     const mockResponse = getMockResponse(msg, currentGameNodeId || undefined);
 
-    // Simulate assistant response
+    // Simulate assistant response with random 5–7s thinking delay
+    const thinkingDelay = 5000 + Math.random() * 2000;
     setTimeout(() => {
       setMessages((prev) =>
         prev.map((m) =>
@@ -239,7 +240,7 @@ export default function Home() {
         setShowPopOutForm(true);
         setPopOutFormData(mockResponse.formData);
       }
-    }, mockResponse.delay || 1500);
+    }, thinkingDelay);
   };
 
   const handleSelectGameOption = (option: { id: string; text: string; nextNode: string }) => {

@@ -1,6 +1,6 @@
-import { ChevronRight } from 'iqons-react';
+import { CaretRight } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function ChevronRightIcon({ size = 16, className = '' }: Props) {
-  return <ChevronRight variant="duotone" size={size} className={className} />;
+  return <CaretRight size={size} className={className} />;
 }

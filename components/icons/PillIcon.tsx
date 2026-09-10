@@ -1,6 +1,6 @@
-import { Medication } from 'iqons-react';
+import { Pill } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function PillIcon({ size = 24, className = '' }: Props) {
-  return <Medication variant="duotone" size={size} className={className} />;
+  return <Pill size={size} className={className} />;
 }

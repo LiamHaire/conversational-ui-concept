@@ -10,6 +10,7 @@ export { LogoMark } from './LogoMark';
 export { DialogueIcon } from './DialogueIcon';
 export { IQIcon } from './IQIcon';
 export { IQChatIcon } from './IQChatIcon';
+export { BrandMarkAIIcon } from './BrandMarkAIIcon';
 
 // Navigation icons
 export { HomeIcon } from './HomeIcon';

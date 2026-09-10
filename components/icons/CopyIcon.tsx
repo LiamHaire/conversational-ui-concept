@@ -1,6 +1,6 @@
-import { Copy } from 'iqons-react';
+import { Copy } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function CopyIcon({ size = 24, className = '' }: Props) {
-  return <Copy variant="duotone" size={size} className={className} />;
+  return <Copy size={size} className={className} />;
 }

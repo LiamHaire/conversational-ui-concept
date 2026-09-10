@@ -1,6 +1,6 @@
-import { Appointment } from 'iqons-react';
+import { CalendarCheck } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function AppointmentIcon({ size = 24, className = '' }: Props) {
-  return <Appointment variant="duotone" size={size} className={className} />;
+  return <CalendarCheck size={size} className={className} />;
 }

@@ -1,6 +1,6 @@
-import { Add } from 'iqons-react';
+import { Plus } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function PlusIcon({ size = 24, className = '' }: Props) {
-  return <Add variant="duotone" size={size} className={className} />;
+  return <Plus size={size} className={className} />;
 }

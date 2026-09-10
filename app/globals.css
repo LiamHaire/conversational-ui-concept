@@ -245,3 +245,124 @@ body {
   background-color: var(--primary-main);
   height: 8px;
 }
+
+/* ── Thinking icon: sequential node-pulse animation ─────────── */
+/*
+  6s cycle, three phases:
+    0–33% : top-right node (19,5)    ripples + pulse → hexagon (11,12)
+    33–67%: bottom-right node (19,19)
+    67–100%: bottom-left node (4,20)
+*/
+
+/* Ripple: scale out from node centre, then vanish */
+@keyframes thinking-ripple-1 {
+  0%   { transform: scale(1);   opacity: 0;    }
+  1%   { transform: scale(1);   opacity: 0.55; }
+  15%  { transform: scale(2.4); opacity: 0;    }
+  100% { transform: scale(1);   opacity: 0;    }
+}
+@keyframes thinking-ripple-2 {
+  0%   { transform: scale(1);   opacity: 0;    }
+  33%  { transform: scale(1);   opacity: 0.55; }
+  47%  { transform: scale(2.4); opacity: 0;    }
+  100% { transform: scale(1);   opacity: 0;    }
+}
+@keyframes thinking-ripple-3 {
+  0%   { transform: scale(1);   opacity: 0;    }
+  67%  { transform: scale(1);   opacity: 0.55; }
+  81%  { transform: scale(2.4); opacity: 0;    }
+  100% { transform: scale(1);   opacity: 0;    }
+}
+
+.thinking-ripple {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.7;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.thinking-ripple-1 { animation: thinking-ripple-1 6s linear infinite; }
+.thinking-ripple-2 { animation: thinking-ripple-2 6s linear infinite; }
+.thinking-ripple-3 { animation: thinking-ripple-3 6s linear infinite; }
+
+/*
+  Pulse: short dash (2 units) travels from node → hexagon centre.
+  Line length ≈ 10.63. dasharray 2 20. dashoffset 2 → -13 sweeps dash
+  from just before the node all the way through to the hexagon centre.
+*/
+@keyframes thinking-pulse-1 {
+  0%   { stroke-dashoffset: 2;   opacity: 0; }
+  2%   { stroke-dashoffset: 2;   opacity: 1; }
+  5%   { stroke-dashoffset: -1; }
+  11%  { stroke-dashoffset: -6; }
+  18%  { stroke-dashoffset: -10; }
+  24%  { stroke-dashoffset: -13; opacity: 0.6; }
+  26%  { stroke-dashoffset: -13; opacity: 0;   }
+  27%  { stroke-dashoffset: 2;   opacity: 0;   }
+  100% { stroke-dashoffset: 2;   opacity: 0;   }
+}
+@keyframes thinking-pulse-2 {
+  0%   { stroke-dashoffset: 2;   opacity: 0; }
+  33%  { stroke-dashoffset: 2;   opacity: 0; }
+  35%  { stroke-dashoffset: 2;   opacity: 1; }
+  38%  { stroke-dashoffset: -1; }
+  44%  { stroke-dashoffset: -6; }
+  51%  { stroke-dashoffset: -10; }
+  57%  { stroke-dashoffset: -13; opacity: 0.6; }
+  59%  { stroke-dashoffset: -13; opacity: 0;   }
+  60%  { stroke-dashoffset: 2;   opacity: 0;   }
+  100% { stroke-dashoffset: 2;   opacity: 0;   }
+}
+@keyframes thinking-pulse-3 {
+  0%   { stroke-dashoffset: 2;   opacity: 0; }
+  67%  { stroke-dashoffset: 2;   opacity: 0; }
+  69%  { stroke-dashoffset: 2;   opacity: 1; }
+  72%  { stroke-dashoffset: -1; }
+  78%  { stroke-dashoffset: -6; }
+  85%  { stroke-dashoffset: -10; }
+  91%  { stroke-dashoffset: -13; opacity: 0.6; }
+  93%  { stroke-dashoffset: -13; opacity: 0;   }
+  94%  { stroke-dashoffset: 2;   opacity: 0;   }
+  100% { stroke-dashoffset: 2;   opacity: 0;   }
+}
+
+.thinking-pulse-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.7;
+  stroke-dasharray: 2 20;
+  stroke-linecap: round;
+  opacity: 0;
+}
+.thinking-pulse-1 { animation: thinking-pulse-1 6s linear infinite; }
+.thinking-pulse-2 { animation: thinking-pulse-2 6s linear infinite; }
+.thinking-pulse-3 { animation: thinking-pulse-3 6s linear infinite; }
+
+/* ── Thinking shimmer ─── */
+
+@keyframes thinking-shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.thinking-row {
+  display: inline-flex;
+  align-items: center;
+}
+
+.thinking-shimmer-text {
+  background: linear-gradient(
+    90deg,
+    var(--text-secondary) 0%,
+    var(--text-secondary) 35%,
+    var(--text-primary)   50%,
+    var(--text-secondary) 65%,
+    var(--text-secondary) 100%
+  );
+  background-size: 300% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: thinking-shimmer 2.8s linear infinite;
+}

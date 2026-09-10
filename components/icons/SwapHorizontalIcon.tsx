@@ -1,6 +1,6 @@
-import { Swap } from 'iqons-react';
+import { ArrowsLeftRight } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function SwapHorizontalIcon({ size = 24, className = '' }: Props) {
-  return <Swap variant="duotone" size={size} className={className} />;
+  return <ArrowsLeftRight size={size} className={className} />;
 }

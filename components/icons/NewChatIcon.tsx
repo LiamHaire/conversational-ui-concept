@@ -1,6 +1,6 @@
-import { ChatNew } from 'iqons-react';
+import { PlusCircle } from '@phosphor-icons/react';
 
 interface Props { size?: number; className?: string; }
 export function NewChatIcon({ size = 24, className = '' }: Props) {
-  return <ChatNew variant="duotone" size={size} className={className} />;
+  return <PlusCircle size={size} className={className} />;
 }
