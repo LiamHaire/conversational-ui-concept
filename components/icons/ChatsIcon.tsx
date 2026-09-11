@@ -1,4 +1,4 @@
-import { Chat } from '@phosphor-icons/react';
+import { Chat } from 'iqons-react';
 
 interface Props { size?: number; className?: string; }
 export function ChatsIcon({ size = 24, className = '' }: Props) {

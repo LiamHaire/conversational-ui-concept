@@ -1,6 +1,6 @@
-import { CaretUp } from '@phosphor-icons/react';
+import { ChevronUp } from 'iqons-react';
 
 interface Props { size?: number; className?: string; }
 export function ChevronUpIcon({ size = 24, className = '' }: Props) {
-  return <CaretUp size={size} className={className} />;
+  return <ChevronUp size={size} className={className} />;
 }

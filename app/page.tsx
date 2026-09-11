@@ -21,10 +21,12 @@ import {
   KanbanCard,
   AnalyticsCard,
   PatientSummaryCard,
-  PatientHeader
+  PatientHeader,
+  PatientDataTableCard,
 } from '@/components/ui/LargeAdaptiveCards';
 import { ActionTiles, ThemeToast, Breadcrumb } from '@/components/ui';
 import { CloseXIcon, SwapHorizontalIcon, NewChatIcon } from '@/components/icons';
+import { ChatNew, MoreVertical, ChevronRight, ChevronLeft } from 'iqons-react';
 import { PopOutForm, TextInput, TextArea, Select } from '@/components/forms';
 import { Message } from '@/types/conversation';
 import { getMockResponse } from '@/lib/mockResponses';
@@ -42,6 +44,7 @@ const LARGE_CARD_LAYOUTS = [
   { type: 'kanban', component: KanbanCard },
   { type: 'analytics', component: AnalyticsCard },
   { type: 'patient-summary', component: PatientSummaryCard },
+  { type: 'patient-data-table', component: PatientDataTableCard },
 ];
 
 const DEFAULT_SUGGESTIONS = [
@@ -79,14 +82,27 @@ export default function Home() {
   const [activePatientId, setActivePatientId] = useState<string>('PT-10002');
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [careMode, setCareMode] = useState<'primary' | 'urgent'>('primary');
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
+  const [showChatOptions, setShowChatOptions] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isFocusMode) setIsFocusMode(false);
+      if (e.key === 'Escape') setShowChatOptions(false);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isFocusMode]);
+
+  useEffect(() => {
+    if (!showChatOptions) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-chat-options]')) setShowChatOptions(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showChatOptions]);
 
   // Refs
   const chatHistoryButtonRef = useRef<HTMLButtonElement>(null);
@@ -656,8 +672,8 @@ export default function Home() {
                       </div>
 
                       {/* Scrollable Content */}
-                      <div className={`flex-1 overflow-y-auto conversation-scroll${largeCardLayout.type === 'patient-summary' ? ' flex flex-col' : ''}`} style={{ scrollbarGutter: 'stable' }}>
-                        <div className={`px-6${largeCardLayout.type === 'patient-summary' ? ' flex-1 flex flex-col' : ''}`}>
+                      <div className={`flex-1 overflow-y-auto conversation-scroll${largeCardLayout.type === 'patient-summary' || largeCardLayout.type === 'patient-data-table' ? ' flex flex-col' : ''}`} style={{ scrollbarGutter: 'stable' }}>
+                        <div className={`px-6${largeCardLayout.type === 'patient-summary' || largeCardLayout.type === 'patient-data-table' ? ' flex-1 flex flex-col' : ''}`}>
                           {/* Patient Banner — sticky inside scroll container so it shares the same width as the widgets */}
                           {showPatientHeader && (
                             <div className="sticky top-0 z-10 bg-background pb-6">
@@ -666,7 +682,7 @@ export default function Home() {
                           )}
 
                           {/* Main Content Area */}
-                          <div className={largeCardLayout.type === 'patient-summary' ? 'flex-1 flex flex-col pb-6' : 'pb-6'}>
+                          <div className={largeCardLayout.type === 'patient-summary' || largeCardLayout.type === 'patient-data-table' ? 'flex-1 flex flex-col pb-6' : 'pb-6'}>
                             {largeCardLayout.type === 'table' && <TableCard />}
                             {largeCardLayout.type === 'dashboard' && <DashboardCard />}
                             {largeCardLayout.type === 'document' && <DocumentCard />}
@@ -676,6 +692,9 @@ export default function Home() {
                             {largeCardLayout.type === 'analytics' && <AnalyticsCard />}
                             {largeCardLayout.type === 'patient-summary' && (
                               <PatientSummaryCard onWidgetClick={handleWidgetClick} activePatientId={activePatientId} className="flex-1" careMode={careMode} />
+                            )}
+                            {largeCardLayout.type === 'patient-data-table' && (
+                              <PatientDataTableCard className="flex-1" />
                             )}
                           </div>
                         </div>
@@ -691,15 +710,31 @@ export default function Home() {
               {!isFocusMode && (
               <motion.div
                 key="dialog-container"
-                initial={{ opacity: 0, flexGrow: 0, flexBasis: 0, width: 0 }}
-                animate={{ opacity: 1, flexGrow: 1, flexBasis: 0, width: 'auto' }}
-                exit={{ opacity: 0, flexGrow: 0, flexBasis: 0, width: 0 }}
+                initial={{ opacity: 0, flexGrow: 0, flexShrink: 0, flexBasis: 0 }}
+                animate={isChatCollapsed
+                  ? { opacity: 1, flexGrow: 0, flexShrink: 0, flexBasis: 64 }
+                  : { opacity: 1, flexGrow: 1, flexShrink: 1, flexBasis: 0 }}
+                exit={{ opacity: 0, flexGrow: 0, flexShrink: 0, flexBasis: 0 }}
                 transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                 className="h-full bg-background border border-border rounded-[12px] overflow-hidden"
-                style={{ minWidth: 0 }}
+                style={{ minWidth: isChatCollapsed ? 64 : 0 }}
               >
+            {/* COLLAPSED DRAWER STATE */}
+            {isChatCollapsed && (
+              <div className="h-full flex flex-col items-center justify-start pt-6">
+                <button
+                  onClick={() => setIsChatCollapsed(false)}
+                  className="w-10 h-10 bg-background border border-border rounded-lg flex items-center justify-center hover:bg-hover transition-colors shadow-sm cursor-pointer"
+                  aria-label="Expand chat"
+                  title="Expand"
+                >
+                  <ChevronLeft size={18} className="text-text-secondary" />
+                </button>
+              </div>
+            )}
+
             {/* STATE 1: LANDING STATE */}
-            {uiState === 'landing' && (
+            {!isChatCollapsed && uiState === 'landing' && (
               <div className="h-full flex flex-col items-center justify-center p-6 relative">
                 <div className="w-full max-w-[800px]">
                   {/* Hero Section with staggered internal animation */}
@@ -785,14 +820,14 @@ export default function Home() {
             )}
 
             {/* STATE 2: ACTIVE CONVERSATION STATE */}
-            {uiState === 'conversation' && (
+            {!isChatCollapsed && uiState === 'conversation' && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
                 className="h-full flex flex-col"
               >
-                {/* Header with New Chat button (and Swap button in large data view) */}
+                {/* Header with action buttons */}
                 <div className="flex-shrink-0 px-6 pt-6 pb-4 flex items-center justify-end gap-2">
                   {showLargeData && (
                     <button
@@ -803,13 +838,63 @@ export default function Home() {
                       <SwapHorizontalIcon size={20} className="text-text-secondary" />
                     </button>
                   )}
-                  <button
-                    onClick={handleNewChat}
-                    className="h-10 px-4 flex items-center gap-2 bg-background border border-border rounded-lg hover:bg-hover transition-colors shadow-sm cursor-pointer"
-                  >
-                    <NewChatIcon size={20} className="text-text-secondary" />
-                    <span className="text-sm font-medium text-text-primary">New chat</span>
-                  </button>
+
+                  {/* Action buttons — only shown in docked (small) view alongside large data panel */}
+                  {showLargeData && <>
+                    {/* New Chat */}
+                    <button
+                      onClick={handleNewChat}
+                      className="w-10 h-10 bg-background border border-border rounded-lg flex items-center justify-center hover:bg-hover transition-colors shadow-sm cursor-pointer"
+                      aria-label="New chat"
+                      title="New chat"
+                    >
+                      <ChatNew size={20} className="text-text-secondary" />
+                    </button>
+
+                    {/* Options */}
+                    <div className="relative" data-chat-options>
+                      <button
+                        onClick={() => setShowChatOptions(prev => !prev)}
+                        className="w-10 h-10 bg-background border border-border rounded-lg flex items-center justify-center hover:bg-hover transition-colors shadow-sm cursor-pointer"
+                        aria-label="Chat options"
+                        title="Options"
+                      >
+                        <MoreVertical size={20} className="text-text-secondary" />
+                      </button>
+                      {showChatOptions && (
+                        <div className="absolute right-0 top-full mt-1 w-44 bg-background border border-border rounded-lg shadow-lg py-1 z-50">
+                          <button
+                            onClick={() => { handleThemeCycle(); setShowChatOptions(false); }}
+                            className="w-full px-4 py-2 text-left text-sm text-text-primary hover:bg-hover transition-colors cursor-pointer"
+                          >
+                            Change theme
+                          </button>
+                          <button
+                            onClick={() => { setShowChatOptions(false); }}
+                            className="w-full px-4 py-2 text-left text-sm text-text-primary hover:bg-hover transition-colors cursor-pointer"
+                          >
+                            Export chat
+                          </button>
+                          <button
+                            onClick={() => { setShowChatOptions(false); }}
+                            className="w-full px-4 py-2 text-left text-sm text-text-primary hover:bg-hover transition-colors cursor-pointer"
+                          >
+                            Clear history
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Collapse */}
+                    <button
+                      onClick={() => { setIsChatCollapsed(true); setShowChatOptions(false); }}
+                      className="w-10 h-10 bg-background border border-border rounded-lg flex items-center justify-center hover:bg-hover transition-colors shadow-sm cursor-pointer"
+                      aria-label="Collapse chat"
+                      title="Collapse"
+                    >
+                      <ChevronRight size={18} className="text-text-secondary" />
+                    </button>
+                  </>}
                 </div>
 
                 {/* Scrollable Conversation Thread */}

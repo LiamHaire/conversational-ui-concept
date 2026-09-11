@@ -31,12 +31,14 @@ export function DialogueIcon({ className = '', width = 94, height = 96, animate 
         d="M39.352 20.8865C41.0295 21.8535 41.6042 23.9952 40.6358 25.6703L23.1014 55.9975C22.133 57.6726 19.9882 58.2463 18.3109 57.2794C16.6336 56.3124 16.0588 54.1705 17.0273 52.4957L34.5617 22.1682C35.5301 20.4934 37.6748 19.9195 39.352 20.8865Z"
         fill="#F15D22"
         animate={animate ? {
-          fill: ['#F15D22', '#FF8C42', '#F15D22']
+          fill: ['#F15D22', '#FFCBA4', '#F15D22']
         } : undefined}
         transition={animate ? {
-          duration: 1.2,
-          times: [0, 0.33, 1],
-          ease: 'easeInOut'
+          duration: 0.6,
+          times: [0, 0.4, 1],
+          ease: 'easeInOut',
+          delay: 0.2,
+          repeat: 0,
         } : undefined}
       />
       {/* Center bar */}
@@ -46,13 +48,14 @@ export function DialogueIcon({ className = '', width = 94, height = 96, animate 
         d="M59.2971 28.4095C60.9744 29.3765 61.5491 31.5182 60.5807 33.193L39.5394 69.586C38.571 71.2609 36.4263 71.8348 34.749 70.8677C33.0716 69.9007 32.4969 67.759 33.4653 66.0841L54.5066 29.6912C55.475 28.0163 57.6197 27.4424 59.2971 28.4095Z"
         fill="#F68E1E"
         animate={animate ? {
-          fill: ['#F68E1E', '#FF8C42', '#F68E1E']
+          fill: ['#F68E1E', '#FFCBA4', '#F68E1E']
         } : undefined}
         transition={animate ? {
-          duration: 1.2,
-          times: [0, 0.5, 1],
+          duration: 0.6,
+          times: [0, 0.4, 1],
           ease: 'easeInOut',
-          delay: 0.15
+          delay: 0.4,
+          repeat: 0,
         } : undefined}
       />
       {/* Right bar */}
@@ -62,13 +65,14 @@ export function DialogueIcon({ className = '', width = 94, height = 96, animate 
         d="M78.4808 44.2505C79.6107 42.2966 79.167 39.9286 77.4896 38.9616C75.8123 37.9945 73.5366 38.7948 72.4069 40.7487L51.95 76.1306C50.8203 78.0848 51.264 80.4528 52.9415 81.4198C54.6187 82.3869 56.8944 81.5867 58.0241 79.6325L78.4808 44.2505Z"
         fill="#F68E1E"
         animate={animate ? {
-          fill: ['#F68E1E', '#FF8C42', '#F68E1E']
+          fill: ['#F68E1E', '#FFCBA4', '#F68E1E']
         } : undefined}
         transition={animate ? {
-          duration: 1.2,
-          times: [0, 0.66, 1],
+          duration: 0.6,
+          times: [0, 0.4, 1],
           ease: 'easeInOut',
-          delay: 0.3
+          delay: 0.6,
+          repeat: 0,
         } : undefined}
       />
       {/* Background elements */}

@@ -1,4 +1,4 @@
-import { Globe } from '@phosphor-icons/react';
+import { Globe } from 'iqons-react';
 
 interface Props { size?: number; className?: string; }
 export function GlobeIcon({ size = 24, className = '' }: Props) {

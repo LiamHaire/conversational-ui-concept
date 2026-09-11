@@ -1,4 +1,4 @@
-import { Microphone } from '@phosphor-icons/react';
+import { Microphone } from 'iqons-react';
 
 interface Props { size?: number; className?: string; }
 export function MicIcon({ size = 24, className = '' }: Props) {

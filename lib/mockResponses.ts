@@ -245,6 +245,18 @@ export function getMockResponse(userMessage: string, gameNodeId?: string): MockR
     };
   }
 
+  // Priority 0a2: Check for data table request
+  if (userMessage.toLowerCase().includes('data table') ||
+      userMessage.toLowerCase().includes('patient list') ||
+      userMessage.toLowerCase().includes('patient table')) {
+    return {
+      content: "Here's a live patient data table. You can sort by any column and search across all fields.",
+      delay: 1000,
+      largeData: true,
+      largeDataType: 'patient-data-table',
+    };
+  }
+
   // Priority 0b: Check for patient summary request
   if (userMessage.toLowerCase().includes('view patient summary') ||
       userMessage.toLowerCase().includes('patient summary')) {

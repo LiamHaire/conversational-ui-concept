@@ -1,6 +1,6 @@
-import { X } from '@phosphor-icons/react';
+import { Close } from 'iqons-react';
 
 interface Props { size?: number; className?: string; }
 export function CloseIcon({ size = 24, className = '' }: Props) {
-  return <X size={size} className={className} />;
+  return <Close size={size} className={className} />;
 }
