@@ -755,10 +755,11 @@ export default function Home() {
                   {/* Prompt Input - Entrance animation + transition animation */}
                   <motion.div
                     className="mt-8"
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 16, scale: 0.98 }}
                     animate={{
                       opacity: 1,
-                      y: isTransitioning ? 'calc(50vh - 120px)' : 0
+                      y: isTransitioning ? 'calc(50vh - 120px)' : 0,
+                      scale: 1,
                     }}
                     transition={
                       isTransitioning
@@ -768,9 +769,9 @@ export default function Home() {
                             ease: [0.4, 0, 0.2, 1]
                           }
                         : {
-                            duration: 0.4,
-                            delay: 0.5,
-                            ease: [0.4, 0, 0.2, 1]
+                            duration: 0.7,
+                            delay: 2.55,
+                            ease: [0.16, 1, 0.3, 1]
                           }
                     }
                   >
@@ -784,7 +785,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{
                       opacity: isTransitioning ? 0 : 1,
-                      y: isTransitioning ? 0 : 0
+                      y: 0,
                     }}
                     transition={
                       isTransitioning
@@ -794,9 +795,9 @@ export default function Home() {
                             ease: [0.4, 0, 0.2, 1]
                           }
                         : {
-                            duration: 0.4,
-                            delay: 0.7,
-                            ease: [0.4, 0, 0.2, 1]
+                            duration: 0.6,
+                            delay: 2.75,
+                            ease: [0.16, 1, 0.3, 1]
                           }
                     }
                   >
