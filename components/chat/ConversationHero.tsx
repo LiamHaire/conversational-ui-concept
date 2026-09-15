@@ -6,13 +6,14 @@ import { useState, useEffect } from 'react';
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const BARS = [
-  { d: 'M39.352 20.8865C41.0295 21.8535 41.6042 23.9952 40.6358 25.6703L23.1014 55.9975C22.133 57.6726 19.9882 58.2463 18.3109 57.2794C16.6336 56.3124 16.0588 54.1705 17.0273 52.4957L34.5617 22.1682C35.5301 20.4934 37.6748 19.9195 39.352 20.8865Z',  fill: '#F15D22', fillOpacity: 1   },
-  { d: 'M59.2971 28.4095C60.9744 29.3765 61.5491 31.5182 60.5807 33.193L39.5394 69.586C38.571 71.2609 36.4263 71.8348 34.749 70.8677C33.0716 69.9007 32.4969 67.759 33.4653 66.0841L54.5066 29.6912C55.475 28.0163 57.6197 27.4424 59.2971 28.4095Z',    fill: '#F68E1E', fillOpacity: 1   },
-  { d: 'M78.4808 44.2505C79.6107 42.2966 79.167 39.9286 77.4896 38.9616C75.8123 37.9945 73.5366 38.7948 72.4069 40.7487L51.95 76.1306C50.8203 78.0848 51.264 80.4528 52.9415 81.4198C54.6187 82.3869 56.8944 81.5867 58.0241 79.6325L78.4808 44.2505Z',      fill: '#F68E1E', fillOpacity: 1   },
-  { d: 'M56.7542 18.8181C57.7226 17.1432 57.148 15.0015 55.4707 14.0344C53.7934 13.0674 51.6485 13.6413 50.6803 15.3162L19.1183 69.9056C18.1499 71.5805 18.7246 73.7221 20.4019 74.6892C22.0793 75.6562 24.224 75.0824 25.1924 73.4075L56.7542 18.8181Z',  fill: '#F15D22', fillOpacity: 0.4 },
-  { d: 'M64.8402 46.85C65.8851 45.0431 65.3723 42.7941 63.6949 41.8271C62.0176 40.8601 59.8109 41.541 58.766 43.3482L47.4158 62.9795C46.3711 64.7865 46.8838 67.0352 48.5613 68.0022C50.2385 68.9693 52.4452 68.2885 53.4899 66.4814L64.8402 46.85Z',      fill: '#F15D22', fillOpacity: 0.4 },
-  { d: 'M77.8295 59.4053C79.5069 60.3724 80.0816 62.514 79.1132 64.1889L75.6061 70.2544C74.6377 71.9295 72.493 72.5034 70.8158 71.5363C69.1383 70.5691 68.5636 68.4274 69.5323 66.7525L73.0391 60.687C74.0075 59.0122 76.1522 58.4383 77.8295 59.4053Z',  fill: '#F15D22', fillOpacity: 0.4 },
-  { d: 'M24.5697 32.4575C25.5597 30.7453 25.0023 28.5733 23.3251 27.6063C21.6478 26.6393 19.4856 27.2434 18.4956 28.9556L14.9106 35.1562C13.9206 36.8686 14.4778 39.0405 16.1551 40.0076C17.8324 40.9746 19.9947 40.3705 20.9847 38.6582L24.5697 32.4575Z',  fill: '#F15D22', fillOpacity: 0.4 },
+  { d: 'M2.88206 9.24178C3.58379 8.02396 5.13796 7.6067 6.35339 8.30981C7.56882 9.01292 7.98525 10.5701 7.28352 11.788L4.74234 16.1981C4.04061 17.4159 2.48645 17.8331 1.27102 17.13C0.0555867 16.4269 -0.36085 14.8697 0.340879 13.6519L2.88206 9.24178Z', fill: '#F5BAA4', fillOpacity: 1 },
+  { d: 'M26.16 19.7671C26.8618 18.5493 28.4159 18.1321 29.6313 18.8352C30.8468 19.5383 31.2632 21.0955 30.5615 22.3133L25.4791 31.1335C24.7774 32.3514 23.2232 32.7686 22.0078 32.0655C20.7924 31.3624 20.3759 29.8052 21.0777 28.5874L26.16 19.7671Z', fill: '#FFB899', fillOpacity: 1 },
+  { d: 'M35.2577 29.4403C35.9594 28.2224 37.5136 27.8052 38.729 28.5083C39.9444 29.2114 40.3609 30.7686 39.6591 31.9864L38.3885 34.1915C37.6868 35.4093 36.1326 35.8266 34.9172 35.1235C33.7018 34.4204 33.2853 32.8631 33.9871 31.6453L35.2577 29.4403Z', fill: '#FFB899', fillOpacity: 1 },
+  { d: 'M2.88206 9.24178C3.58379 8.02396 5.13796 7.6067 6.35339 8.30981C7.56882 9.01292 7.98525 10.5701 7.28352 11.788L4.74234 16.1981C4.04061 17.4159 2.48645 17.8331 1.27102 17.13C0.0555867 16.4269 -0.36085 14.8697 0.340879 13.6519L2.88206 9.24178Z', fill: '#F68E1E', fillOpacity: 1 },
+  { d: 'M22.1444 1.27351C22.8461 0.0556959 24.4003 -0.361559 25.6157 0.341548C26.8311 1.04466 27.2476 2.60188 26.5459 3.81969L7.48697 36.8955C6.78524 38.1133 5.23108 38.5306 4.01565 37.8275C2.80022 37.1244 2.38378 35.5672 3.08551 34.3493L22.1444 1.27351Z', fill: '#F15D22', fillOpacity: 1 },
+  { d: 'M25.7406 7.76375C26.4423 6.54593 27.9965 6.12867 29.2119 6.83178C30.4273 7.53489 30.8438 9.09211 30.142 10.3099L14.8949 36.7706C14.1932 37.9884 12.639 38.4057 11.4236 37.7026C10.2082 36.9995 9.79174 35.4422 10.4935 34.2244L25.7406 7.76375Z', fill: '#F68E1E', fillOpacity: 1 },
+  { d: 'M34.2029 18.5396C34.9046 17.3218 36.4588 16.9046 37.6742 17.6077C38.8897 18.3108 39.3061 19.868 38.6044 21.0858L28.4396 38.7263C27.7379 39.9441 26.1837 40.3613 24.9683 39.6582C23.7529 38.9551 23.3365 37.3979 24.0382 36.1801L34.2029 18.5396Z', fill: '#F68E1E', fillOpacity: 1 },
+  { d: 'M12.1956 5.80916C12.8973 4.59134 14.4515 4.17409 15.6669 4.87719C16.8823 5.5803 17.2987 7.13752 16.597 8.35534L6.43228 25.9958C5.73055 27.2136 4.17639 27.6309 2.96096 26.9277C1.74553 26.2246 1.32909 24.6674 2.03082 23.4496L12.1956 5.80916Z', fill: '#FFB899', fillOpacity: 1 },
 ];
 
 const SUBTEXT_VARIATIONS = [
@@ -38,6 +39,7 @@ interface ConversationHeroProps {
   greeting?: string;
   subtext?: string;
   skipAnimation?: boolean;
+  onIntroComplete?: () => void;
 }
 
 export function ConversationHero({
@@ -45,6 +47,7 @@ export function ConversationHero({
   greeting = `Hey ${userName || 'there'}!`,
   subtext,
   skipAnimation = false,
+  onIntroComplete,
 }: ConversationHeroProps) {
   const prefersReduced = useReducedMotion();
   const play = !skipAnimation && !prefersReduced;
@@ -53,8 +56,10 @@ export function ConversationHero({
   const [logoRisen, setLogoRisen] = useState(false);
   useEffect(() => {
     if (!play) { setLogoRisen(true); return; }
-    const t = setTimeout(() => setLogoRisen(true), 1250);
-    return () => clearTimeout(t);
+    const t1 = setTimeout(() => setLogoRisen(true), 1250);
+    // Mark intro complete after the last element (subtext) has finished animating
+    const t2 = setTimeout(() => onIntroComplete?.(), 3000);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [randomSubtext, setRandomSubtext] = useState(subtext || SUBTEXT_VARIATIONS[0]);
@@ -83,30 +88,29 @@ export function ConversationHero({
             animate={play ? { opacity: 1, filter: 'blur(0px)', y: 0 } : false}
             transition={{ duration: 0.9, delay: 0.15, ease: EASE }}
           >
-            {/* 7 bars stagger in individually */}
-            <svg width={94} height={96} viewBox="0 0 94 96" fill="none">
-              {BARS.map((bar, i) => (
-                <motion.path
-                  key={i}
-                  d={bar.d}
-                  fill={bar.fill}
-                  fillOpacity={bar.fillOpacity}
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  initial={play ? { opacity: 0, scale: 0 } : false}
-                  animate={play ? { opacity: 1, scale: 1 } : false}
-                  style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
-                  transition={{ duration: 0.45, delay: 0.15 + i * 0.08, ease: EASE }}
-                />
-              ))}
-            </svg>
+              <svg width={94} height={94} viewBox="0 0 40 40" fill="none">
+                {BARS.map((bar, i) => (
+                  <motion.path
+                    key={i}
+                    d={bar.d}
+                    fill={bar.fill}
+                    fillOpacity={bar.fillOpacity}
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    initial={play ? { opacity: 0, scale: 0 } : false}
+                    animate={play ? { opacity: 1, scale: 1 } : false}
+                    style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+                    transition={{ duration: 0.45, delay: 0.15 + i * 0.08, ease: EASE }}
+                  />
+                ))}
+              </svg>
           </motion.div>
         </motion.div>
       </div>
 
       {/* ── Greeting ─────────────────────────────────────────────────────── */}
       <motion.h1
-        className="text-3xl font-semibold text-text-primary mb-3"
+        className="text-5xl font-semibold text-text-primary mb-3"
         initial={play ? { opacity: 0, y: 14, filter: 'blur(6px)' } : false}
         animate={play ? { opacity: 1, y: 0, filter: 'blur(0px)' } : false}
         transition={{ duration: 0.7, delay: 1.95, ease: EASE }}

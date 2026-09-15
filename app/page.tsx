@@ -9,7 +9,8 @@ import {
   PromptSuggestions,
   ConversationThread,
   ChatHistoryPopover,
-  NotificationsPopover
+  NotificationsPopover,
+  IntroAnimation,
 } from '@/components/chat';
 import { getMockNotifications } from '@/lib/mockNotifications';
 import {
@@ -81,9 +82,12 @@ export default function Home() {
   const [popOutFormData, setPopOutFormData] = useState<{ title: string; subtitle?: string; formId?: string } | null>(null);
   const [activePatientId, setActivePatientId] = useState<string>('PT-10002');
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const [focusModeEverToggled, setFocusModeEverToggled] = useState(false);
   const [careMode, setCareMode] = useState<'primary' | 'urgent'>('primary');
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const [showChatOptions, setShowChatOptions] = useState(false);
+  const [introHasPlayed, setIntroHasPlayed] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -555,13 +559,17 @@ export default function Home() {
   return (
     <main className="h-screen bg-background-soft">
       <div className="flex h-full">
-        {/* Fixed Sidebar — hidden in focus mode */}
+        {/* Intro animation overlay */}
+        {showIntro && (
+          <IntroAnimation onComplete={() => setShowIntro(false)} />
+        )}
+
+        {/* Fixed Sidebar */}
         <AnimatePresence>
           {!isFocusMode && (
             <motion.div
               key="sidebar"
-              initial={{ opacity: 0, x: -64 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={false}
               exit={{ opacity: 0, x: -64 }}
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             >
@@ -570,7 +578,7 @@ export default function Home() {
                 onHelpClick={handleThemeCycle}
                 onChatHistoryClick={handleChatHistoryClick}
                 onNotificationsClick={handleNotificationsClick}
-                onSearchClick={() => setIsFocusMode(true)}
+                onSearchClick={() => { setIsFocusMode(true); setFocusModeEverToggled(true); }}
                 chatHistoryButtonRef={chatHistoryButtonRef}
                 notificationsButtonRef={notificationsButtonRef}
                 isOnHome={uiState === 'landing'}
@@ -601,7 +609,7 @@ export default function Home() {
         {/* New Chat Button is now inside dialog container for both views */}
 
         {/* Main Content Area */}
-        <section className={`flex-1 transition-[margin] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isFocusMode ? 'ml-0' : 'ml-16'}`}>
+        <section className={`flex-1 ${focusModeEverToggled ? 'transition-[margin] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]' : ''} ${isFocusMode ? 'ml-0' : 'ml-16'}`}>
           <div className="h-full p-6">
             <div className="h-full flex gap-6" style={{ flexDirection: isLayoutSwapped ? 'row-reverse' : 'row' }}>
               <AnimatePresence>
@@ -710,7 +718,7 @@ export default function Home() {
               {!isFocusMode && (
               <motion.div
                 key="dialog-container"
-                initial={{ opacity: 0, flexGrow: 0, flexShrink: 0, flexBasis: 0 }}
+                initial={showLargeData ? { opacity: 0, flexGrow: 0, flexShrink: 0, flexBasis: 0 } : false}
                 animate={isChatCollapsed
                   ? { opacity: 1, flexGrow: 0, flexShrink: 0, flexBasis: 64 }
                   : { opacity: 1, flexGrow: 1, flexShrink: 1, flexBasis: 0 }}
@@ -737,19 +745,25 @@ export default function Home() {
             {!isChatCollapsed && uiState === 'landing' && (
               <div className="h-full flex flex-col items-center justify-center p-6 relative">
                 <div className="w-full max-w-[800px]">
-                  {/* Hero Section with staggered internal animation */}
+                  {/* Hero Section */}
                   <motion.div
+                    initial={introHasPlayed ? { opacity: 0 } : false}
                     animate={{
                       opacity: isTransitioning ? 0 : 1,
                       y: isTransitioning ? -20 : 0
                     }}
-                    transition={{
-                      duration: 0.5,
-                      delay: isTransitioning ? 0.35 : 0,
-                      ease: [0.4, 0, 0.2, 1]
-                    }}
+                    transition={
+                      isTransitioning
+                        ? { duration: 0.5, delay: 0.35, ease: [0.4, 0, 0.2, 1] }
+                        : introHasPlayed
+                        ? { duration: 0.35, ease: [0.16, 1, 0.3, 1] }
+                        : { duration: 0.5, ease: [0.4, 0, 0.2, 1] }
+                    }
                   >
-                    <ConversationHero skipAnimation={isTransitioning} />
+                    <ConversationHero
+                      skipAnimation={isTransitioning || introHasPlayed || showIntro}
+                      onIntroComplete={() => setIntroHasPlayed(true)}
+                    />
                   </motion.div>
 
                   {/* Prompt Input - Entrance animation + transition animation */}
@@ -763,16 +777,10 @@ export default function Home() {
                     }}
                     transition={
                       isTransitioning
-                        ? {
-                            duration: 1.2,
-                            delay: 1.0,
-                            ease: [0.4, 0, 0.2, 1]
-                          }
-                        : {
-                            duration: 0.7,
-                            delay: 2.55,
-                            ease: [0.16, 1, 0.3, 1]
-                          }
+                        ? { duration: 1.2, delay: 1.0, ease: [0.4, 0, 0.2, 1] }
+                        : introHasPlayed
+                        ? { duration: 0.35, delay: 0.05, ease: [0.16, 1, 0.3, 1] }
+                        : { duration: 0.7, delay: 2.55, ease: [0.16, 1, 0.3, 1] }
                     }
                   >
                     <PromptInput onSubmit={handleSubmit} />
@@ -789,16 +797,10 @@ export default function Home() {
                     }}
                     transition={
                       isTransitioning
-                        ? {
-                            duration: 0.3,
-                            delay: 0,
-                            ease: [0.4, 0, 0.2, 1]
-                          }
-                        : {
-                            duration: 0.6,
-                            delay: 2.75,
-                            ease: [0.16, 1, 0.3, 1]
-                          }
+                        ? { duration: 0.3, delay: 0, ease: [0.4, 0, 0.2, 1] }
+                        : introHasPlayed
+                        ? { duration: 0.35, delay: 0.1, ease: [0.16, 1, 0.3, 1] }
+                        : { duration: 0.6, delay: 2.75, ease: [0.16, 1, 0.3, 1] }
                     }
                   >
                     {/* Left column: Action Tiles (1/3 width) */}

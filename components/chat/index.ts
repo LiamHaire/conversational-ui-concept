@@ -22,3 +22,4 @@ export { NewChatButton } from './NewChatButton';
 export { SwapLayoutButton } from './SwapLayoutButton';
 export { ChatHistoryPopover } from './ChatHistoryPopover';
 export { NotificationsPopover } from './NotificationsPopover';
+export { IntroAnimation } from './IntroAnimation';

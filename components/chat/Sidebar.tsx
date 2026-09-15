@@ -1,14 +1,7 @@
 'use client';
 
-/**
- * Sidebar Component
- *
- * Fixed-position left sidebar with icon-based navigation.
- * Features vertical layout with logo at top, navigation groups, and utility icons at bottom.
- */
-
-import { useRef } from 'react';
 import {
+  BrandMark,
   IQIcon,
   HomeIcon,
   ChatHistoryIcon,
@@ -39,7 +32,7 @@ export function Sidebar({ onHomeClick, onHelpClick, onChatHistoryClick, onNotifi
     <aside className="fixed left-0 top-0 h-screen w-16 bg-background border-r border-border flex flex-col items-center py-6 z-50">
       {/* Logo */}
       <div className="mb-8">
-        <IQIcon width={32} height={24} />
+        <BrandMark size={32} />
       </div>
 
       {/* Main Navigation - Top */}

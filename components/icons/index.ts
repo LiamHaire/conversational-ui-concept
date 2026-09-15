@@ -9,6 +9,7 @@
 export { LogoMark } from './LogoMark';
 export { DialogueIcon } from './DialogueIcon';
 export { IQIcon } from './IQIcon';
+export { BrandMark } from './BrandMark';
 export { IQChatIcon } from './IQChatIcon';
 export { BrandMarkAIIcon } from './BrandMarkAIIcon';
 
