@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LoginScreen } from '@/components/auth/LoginScreen';
 import {
   Sidebar,
   ConversationHero,
@@ -87,7 +88,8 @@ export default function Home() {
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const [showChatOptions, setShowChatOptions] = useState(false);
   const [introHasPlayed, setIntroHasPlayed] = useState(false);
-  const [showIntro, setShowIntro] = useState(true);
+  const [showLogin, setShowLogin] = useState(true);
+  const [showIntro, setShowIntro] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -559,6 +561,13 @@ export default function Home() {
   return (
     <main className="h-screen bg-background-soft">
       <div className="flex h-full">
+        {/* Login screen */}
+        <AnimatePresence>
+          {showLogin && (
+            <LoginScreen onSignIn={() => { setShowLogin(false); setShowIntro(true); }} />
+          )}
+        </AnimatePresence>
+
         {/* Intro animation overlay */}
         {showIntro && (
           <IntroAnimation onComplete={() => setShowIntro(false)} />
@@ -566,7 +575,7 @@ export default function Home() {
 
         {/* Fixed Sidebar */}
         <AnimatePresence>
-          {!isFocusMode && (
+          {!isFocusMode && !showLogin && (
             <motion.div
               key="sidebar"
               initial={false}
@@ -609,7 +618,7 @@ export default function Home() {
         {/* New Chat Button is now inside dialog container for both views */}
 
         {/* Main Content Area */}
-        <section className={`flex-1 ${focusModeEverToggled ? 'transition-[margin] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]' : ''} ${isFocusMode ? 'ml-0' : 'ml-16'}`}>
+        {!showLogin && <section className={`flex-1 ${focusModeEverToggled ? 'transition-[margin] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]' : ''} ${isFocusMode ? 'ml-0' : 'ml-16'}`}>
           <div className="h-full p-6">
             <div className="h-full flex gap-6" style={{ flexDirection: isLayoutSwapped ? 'row-reverse' : 'row' }}>
               <AnimatePresence>
@@ -937,7 +946,7 @@ export default function Home() {
               </AnimatePresence>
             </div>
           </div>
-        </section>
+        </section>}
       </div>
 
       {/* Theme Toast Notification */}

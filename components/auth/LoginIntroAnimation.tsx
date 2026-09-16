@@ -5,19 +5,16 @@ import { useState, useEffect } from 'react';
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-// Scale brandmark to match ConversationHero icon (svg width=94). Brandmark in 2.svg spans x 0–40 → scale = 94/40
-const SIDEBAR_W = 64; // w-16
+// Same SVG dimensions as IntroAnimation — no sidebar offset (login is full-screen)
 const SCALE = 94 / 40;
 const SVG_W = Math.round(416 * SCALE); // 978
 const SVG_H = Math.round(80 * SCALE);  // 188
-// Brandmark centre in rendered pixels from SVG left edge (viewBox x=20 scaled)
 const BM_CX = Math.round(20 * SCALE);  // 47
-// When SVG is flex-centred in the content area, this x-translate centres the brandmark
-const BM_OFFSET_X = SVG_W / 2 - BM_CX; // 442 — independent of content-area width
+const BM_OFFSET_X = SVG_W / 2 - BM_CX; // 442 — centres brandmark regardless of viewport width
 
 const N_LETTERS = 11;
-const LETTER_ENTRY_DELAY = 0.05;  // per letter, left-to-right
-const LETTER_EXIT_DELAY  = 0.04;  // per letter, right-to-left
+const LETTER_ENTRY_DELAY = 0.05;
+const LETTER_EXIT_DELAY  = 0.04;
 
 const BM_PATHS = [
   { d: 'M2.88206 29.2418C3.58379 28.024 5.13796 27.6067 6.35339 28.3098C7.56882 29.0129 7.98525 30.5701 7.28352 31.788L4.74234 36.1981C4.04061 37.4159 2.48645 37.8331 1.27102 37.13C0.0555867 36.4269 -0.36085 34.8697 0.340879 33.6519L2.88206 29.2418Z', fill: '#F5BAA4' },
@@ -51,22 +48,16 @@ const LETTER_GROUPS: Array<{ key: string; paths: LetterPath[] }> = [
   { key: 'd2', paths: [{ d: 'M401.82 57.572C395.484 57.572 391.392 53.084 391.392 46.132C391.392 39.136 395.572 34.296 402.26 34.296C404.988 34.296 407.584 35.396 408.86 37.024V23.824H415.636V57H409.256L408.904 54.184C407.716 56.208 404.988 57.572 401.82 57.572ZM403.448 51.368C406.616 51.368 408.816 49.168 408.816 45.868C408.816 42.568 406.616 40.368 403.448 40.368C400.236 40.368 398.212 42.612 398.212 45.868C398.212 49.124 400.236 51.368 403.448 51.368Z', fillRule: 'evenodd', gradIdx: 8 }] },
 ];
 
-type Phase = 'brandmark' | 'shift' | 'wordmark' | 'dismissing' | 'recenter' | 'exit';
+type LoginPhase = 'brandmark' | 'shift' | 'wordmark' | 'dismissing' | 'recenter' | 'pulse' | 'exit';
 
-interface IntroAnimationProps {
+interface LoginIntroAnimationProps {
   onComplete: () => void;
 }
 
-export function IntroAnimation({ onComplete }: IntroAnimationProps) {
+export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
   const prefersReduced = useReducedMotion();
-  const [phase, setPhase] = useState<Phase>('brandmark');
+  const [phase, setPhase] = useState<LoginPhase>('brandmark');
   const [done, setDone] = useState(false);
-  const [heroCenter, setHeroCenter] = useState<{ x: number; y: number } | null>(null);
-  const [vp, setVp] = useState({ w: 1280, h: 800 });
-
-  useEffect(() => {
-    setVp({ w: window.innerWidth - SIDEBAR_W, h: window.innerHeight });
-  }, []);
 
   useEffect(() => {
     if (prefersReduced) { onComplete(); return; }
@@ -75,19 +66,10 @@ export function IntroAnimation({ onComplete }: IntroAnimationProps) {
       setTimeout(() => setPhase('wordmark'),   1050),
       setTimeout(() => setPhase('dismissing'), 2050),
       setTimeout(() => setPhase('recenter'),   2800),
-      setTimeout(() => {
-        // Measure hero icon position just before flying to it
-        const el = document.querySelector('[data-intro-hero-icon]');
-        if (el) {
-          const r = el.getBoundingClientRect();
-          setHeroCenter({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
-        }
-        setPhase('exit');
-      }, 3550),
-      // Fire onComplete 400ms into the fly so hero logo fades in while animated mark is still moving
-      setTimeout(() => onComplete(), 3950),
-      // Remove overlay from DOM after fade completes (delay 0.6s + duration 0.4s = 1s after exit starts)
-      setTimeout(() => setDone(true), 4650),
+      setTimeout(() => setPhase('pulse'),      3400),
+      setTimeout(() => setPhase('exit'),       3950),
+      setTimeout(() => onComplete(),           4250),
+      setTimeout(() => setDone(true),          4500),
     ];
     return () => t.forEach(clearTimeout);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -97,126 +79,158 @@ export function IntroAnimation({ onComplete }: IntroAnimationProps) {
   const isWordmarkVisible = phase === 'shift' || phase === 'wordmark' || phase === 'dismissing';
   const isLetterEntry    = phase === 'wordmark';
   const isLetterExit     = phase === 'dismissing';
-  const isBrandmarkCentred = phase === 'brandmark' || phase === 'recenter' || phase === 'exit';
-  const isExit           = phase === 'exit';
+  const isBrandmarkCentred = phase === 'brandmark' || phase === 'recenter' || phase === 'pulse' || phase === 'exit';
+  const isPulse = phase === 'pulse';
+  const isExit  = phase === 'exit';
 
-  // Translate to centre the brandmark on screen (vs centring the whole SVG)
+  // Lock x — brandmark stays centred, no slide on exit
   const containerX = isBrandmarkCentred ? BM_OFFSET_X : 0;
 
-  // Exit: fly brandmark to the ConversationHero icon position.
-  // heroCenter is in full-viewport coords; overlay centre X = SIDEBAR_W + vp.w/2
-  const exitX = isExit && heroCenter ? BM_OFFSET_X + (heroCenter.x - (SIDEBAR_W + vp.w / 2)) : containerX;
-  const exitY = isExit && heroCenter ? heroCenter.y - vp.h / 2 : 0;
+  // Pulse: single smooth scale up and back, then exit fades in place
+  const markAnimate = isPulse
+    ? { scale: [1, 1.25, 1] as number[], opacity: 1 }
+    : isExit
+    ? { scale: 1, opacity: 0 }
+    : { scale: 1, opacity: 1 };
+
+  const markTransition = isPulse
+    ? { duration: 0.22, times: [0, 0.4, 1], ease: 'easeInOut' as const }
+    : isExit
+    ? { duration: 0.35, ease: [0.4, 0, 1, 1] as [number, number, number, number] }
+    : { duration: 0.4, ease: EASE };
 
   return (
+    // Transparent overlay — login background image shows through
     <motion.div
-      className="fixed top-0 bottom-0 z-[200] flex items-center justify-center overflow-hidden bg-background pointer-events-none"
-      style={{ left: SIDEBAR_W, right: 0 }}
-      animate={{ opacity: isExit ? 0 : 1 }}
-      transition={{ duration: 0.4, delay: isExit ? 0.6 : 0, ease: [0.4, 0, 0.2, 1] }}
+      className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden pointer-events-none"
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
     >
+      {/* Circular pulse wave — emanates from brandmark centre on pulse phase */}
+      {isPulse && (
+        <motion.div
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: 80,
+            height: 80,
+            border: '2px solid rgba(241, 93, 34, 0.6)',
+          }}
+          initial={{ scale: 0.8, opacity: 0.8 }}
+          animate={{ scale: 5, opacity: 0 }}
+          transition={{ duration: 0.6, ease: [0, 0, 0.2, 1] }}
+        />
+      )}
+
+      {/* X-shift: slides left to reveal wordmark, recentres */}
       <motion.div
-        animate={{ x: exitX, y: exitY }}
+        animate={{ x: containerX }}
         transition={{ duration: 0.7, ease: EASE }}
       >
-        <svg
-          width={SVG_W}
-          height={SVG_H}
-          viewBox="0 0 416 80"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
+        {/* Pulse / fade layer — transformOrigin anchored to brandmark centre within SVG */}
+        <motion.div
+          animate={markAnimate}
+          transition={markTransition}
+          style={{ transformOrigin: `${BM_CX}px 50%` }}
         >
-          <defs>
-            {[...Array(12)].map((_, i) => (
-              <linearGradient
+          <svg
+            width={SVG_W}
+            height={SVG_H}
+            viewBox="0 0 416 80"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              {[...Array(12)].map((_, i) => (
+                <linearGradient
+                  key={i}
+                  id={`li-g${i}`}
+                  x1={i === 0 ? '196.5' : '85.364'}
+                  y1={i === 0 ? '23' : '40'}
+                  x2={i === 0 ? '212' : '415.636'}
+                  y2={i === 0 ? '63.5' : '40'}
+                  gradientUnits="userSpaceOnUse"
+                >
+                  {i === 0 ? (
+                    <>
+                      <stop offset="0.326249" stopColor="#862C09" />
+                      <stop offset="1" stopColor="#F15D22" />
+                    </>
+                  ) : (
+                    <>
+                      <stop stopColor="#F68E1E" />
+                      <stop offset="0.886575" stopColor="#F15D22" />
+                    </>
+                  )}
+                </linearGradient>
+              ))}
+            </defs>
+
+            {/* Brandmark bars — stagger in on mount */}
+            {BM_PATHS.map((p, i) => (
+              <motion.path
                 key={i}
-                id={`ia-g${i}`}
-                x1={i === 0 ? '196.5' : '85.364'}
-                y1={i === 0 ? '23' : '40'}
-                x2={i === 0 ? '212' : '415.636'}
-                y2={i === 0 ? '63.5' : '40'}
-                gradientUnits="userSpaceOnUse"
-              >
-                {i === 0 ? (
-                  <>
-                    <stop offset="0.326249" stopColor="#862C09" />
-                    <stop offset="1" stopColor="#F15D22" />
-                  </>
-                ) : (
-                  <>
-                    <stop stopColor="#F68E1E" />
-                    <stop offset="0.886575" stopColor="#F15D22" />
-                  </>
-                )}
-              </linearGradient>
+                d={p.d}
+                fill={p.fill}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+                transition={{ duration: 0.38, delay: 0.08 + i * 0.055, ease: EASE }}
+              />
             ))}
-          </defs>
 
-          {/* Brandmark bars — stagger in on mount */}
-          {BM_PATHS.map((p, i) => (
-            <motion.path
-              key={i}
-              d={p.d}
-              fill={p.fill}
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
+            {/* Divider line */}
+            <motion.rect
+              x={64} y={0} width={4} height={80} rx={2} fill="#F15D22"
+              initial={{ opacity: 0, scaleY: 0 }}
+              animate={{
+                opacity: isWordmarkVisible ? 1 : 0,
+                scaleY: isWordmarkVisible ? 1 : 0,
+              }}
               style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
-              transition={{ duration: 0.38, delay: 0.08 + i * 0.055, ease: EASE }}
+              transition={{ duration: 0.3, delay: isWordmarkVisible ? 0.05 : 0, ease: EASE }}
             />
-          ))}
 
-          {/* Divider line */}
-          <motion.rect
-            x={64} y={0} width={4} height={80} rx={2} fill="#F15D22"
-            initial={{ opacity: 0, scaleY: 0 }}
-            animate={{
-              opacity: isWordmarkVisible ? 1 : 0,
-              scaleY: isWordmarkVisible ? 1 : 0,
-            }}
-            style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
-            transition={{ duration: 0.3, delay: isWordmarkVisible ? 0.05 : 0, ease: EASE }}
-          />
-
-          {/* Letters — stagger in left-to-right, out right-to-left */}
-          {LETTER_GROUPS.map((group, gi) => {
-            const entryDelay = gi * LETTER_ENTRY_DELAY;
-            const exitDelay  = (N_LETTERS - 1 - gi) * LETTER_EXIT_DELAY;
-            const visible = isLetterEntry;
-            return (
-              <motion.g
-                key={group.key}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{
-                  opacity: visible ? 1 : 0,
-                  y: visible ? 0 : isLetterExit ? -5 : 6,
-                }}
-                transition={{
-                  duration: 0.28,
-                  delay: isLetterEntry ? entryDelay : isLetterExit ? exitDelay : 0,
-                  ease: EASE,
-                }}
-              >
-                {group.paths.map((p, pi) => (
-                  <g key={pi}>
-                    <path
-                      d={p.d}
-                      fill="#F15D22"
-                      fillRule={p.fillRule ?? 'nonzero'}
-                      clipRule={p.fillRule ?? 'nonzero'}
-                    />
-                    <path
-                      d={p.d}
-                      fill={`url(#ia-g${p.gradIdx})`}
-                      fillOpacity={0.8}
-                      fillRule={p.fillRule ?? 'nonzero'}
-                      clipRule={p.fillRule ?? 'nonzero'}
-                    />
-                  </g>
-                ))}
-              </motion.g>
-            );
-          })}
-        </svg>
+            {/* Letters — stagger in left-to-right, out right-to-left */}
+            {LETTER_GROUPS.map((group, gi) => {
+              const entryDelay = gi * LETTER_ENTRY_DELAY;
+              const exitDelay  = (N_LETTERS - 1 - gi) * LETTER_EXIT_DELAY;
+              const visible = isLetterEntry;
+              return (
+                <motion.g
+                  key={group.key}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{
+                    opacity: visible ? 1 : 0,
+                    y: visible ? 0 : isLetterExit ? -5 : 6,
+                  }}
+                  transition={{
+                    duration: 0.28,
+                    delay: isLetterEntry ? entryDelay : isLetterExit ? exitDelay : 0,
+                    ease: EASE,
+                  }}
+                >
+                  {group.paths.map((p, pi) => (
+                    <g key={pi}>
+                      <path
+                        d={p.d}
+                        fill="#F15D22"
+                        fillRule={p.fillRule ?? 'nonzero'}
+                        clipRule={p.fillRule ?? 'nonzero'}
+                      />
+                      <path
+                        d={p.d}
+                        fill={`url(#li-g${p.gradIdx})`}
+                        fillOpacity={0.8}
+                        fillRule={p.fillRule ?? 'nonzero'}
+                        clipRule={p.fillRule ?? 'nonzero'}
+                      />
+                    </g>
+                  ))}
+                </motion.g>
+              );
+            })}
+          </svg>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
