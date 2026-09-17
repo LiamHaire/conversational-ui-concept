@@ -63,11 +63,11 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
       setTimeout(() => setPhase('shift'),      800),
       setTimeout(() => setPhase('wordmark'),   1050),
       setTimeout(() => setPhase('dismissing'), 2050),
-      setTimeout(() => setPhase('recenter'),   2950),
-      setTimeout(() => setPhase('pulse'),      3400),
-      setTimeout(() => setPhase('exit'),       3950),
-      setTimeout(() => onComplete(),           4250),
-      setTimeout(() => setDone(true),          4500),
+      setTimeout(() => setPhase('recenter'),   2850),
+      setTimeout(() => setPhase('pulse'),      2950),
+      setTimeout(() => setPhase('exit'),       3500),
+      setTimeout(() => onComplete(),           3800),
+      setTimeout(() => setDone(true),          4050),
     ];
     return () => t.forEach(clearTimeout);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
