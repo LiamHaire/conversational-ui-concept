@@ -71,6 +71,16 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentGameNodeId, setCurrentGameNodeId] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  // 'idle' | 'sliding' | 'locking' — drives the docking animation
+  const [dockPhase, setDockPhase] = useState<'idle' | 'sliding' | 'locking'>('idle');
+  // Fixed overlay geometry: start = landing input rect, end = conversation footer input rect
+  const [dockGeometry, setDockGeometry] = useState<{
+    startTop: number; startLeft: number; startWidth: number; startHeight: number;
+    endTop: number;
+  } | null>(null);
+  const landingInputRef = useRef<HTMLDivElement>(null);
+  const conversationFooterInputRef = useRef<HTMLDivElement>(null);
+  const dialogContainerRef = useRef<HTMLDivElement>(null);
   const [showLargeData, setShowLargeData] = useState(false);
   const [largeCardLayout, setLargeCardLayout] = useState<typeof LARGE_CARD_LAYOUTS[0] | null>(null);
   const [closedLargeDataContext, setClosedLargeDataContext] = useState<{ layout: typeof LARGE_CARD_LAYOUTS[0]; messageContent: string } | null>(null);
@@ -168,17 +178,44 @@ export default function Home() {
     dependencies: [messages],
   });
 
+  const startDockingTransition = () => {
+    const landingRect = landingInputRef.current?.getBoundingClientRect();
+    if (!landingRect) return;
+
+    // Set dockPhase BEFORE mounting the conversation view so it renders with opacity:0 from the start
+    setIsTransitioning(true);
+    setDockPhase('sliding');
+    setUiState('conversation');
+
+    // After conversation DOM paints, measure the footer input position and create the overlay
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const footerRect = conversationFooterInputRef.current?.getBoundingClientRect();
+        if (!footerRect) return;
+
+        setDockGeometry({
+          startTop: landingRect.top,
+          startLeft: landingRect.left,
+          startWidth: landingRect.width,
+          startHeight: landingRect.height,
+          endTop: footerRect.top,
+        });
+
+        // Slide animation runs for 1100ms, then locking fade for 300ms
+        setTimeout(() => setDockPhase('locking'), 1100);
+        setTimeout(() => {
+          setDockPhase('idle');
+          setDockGeometry(null);
+          setIsTransitioning(false);
+        }, 1400);
+      });
+    });
+  };
+
   const handleSubmit = (msg: string) => {
     if (!msg.trim()) return;
 
-    // Start transition animation
-    setIsTransitioning(true);
-
-    // Transition to conversation state after animation
-    setTimeout(() => {
-      setUiState('conversation');
-      setIsTransitioning(false);
-    }, 2200);
+    startDockingTransition();
 
     // Create user message
     const userMessage: Message = {
@@ -366,14 +403,8 @@ export default function Home() {
   };
 
   const handleTileClick = (tile: { id: string; type: 'task' | 'appointment' | 'report'; count: number; label: string }) => {
-    // Start transition animation
-    setIsTransitioning(true);
-
-    // Transition to conversation state after animation
-    setTimeout(() => {
-      setUiState('conversation');
-      setIsTransitioning(false);
-    }, 2200);
+    // Trigger the docking animation (same as handleSubmit)
+    startDockingTransition();
 
     // Create user message based on tile
     const tileMessages: Record<string, string> = {
@@ -564,7 +595,7 @@ export default function Home() {
         {/* Login screen */}
         <AnimatePresence>
           {showLogin && (
-            <LoginScreen onSignIn={() => { setShowLogin(false); setShowIntro(true); }} />
+            <LoginScreen onSignIn={() => { setShowLogin(false); /* setShowIntro(true); — disabled while login handles animation */ }} />
           )}
         </AnimatePresence>
 
@@ -733,6 +764,7 @@ export default function Home() {
                   : { opacity: 1, flexGrow: 1, flexShrink: 1, flexBasis: 0 }}
                 exit={{ opacity: 0, flexGrow: 0, flexShrink: 0, flexBasis: 0 }}
                 transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                ref={dialogContainerRef}
                 className="h-full bg-background border border-border rounded-[12px] overflow-hidden"
                 style={{ minWidth: isChatCollapsed ? 64 : 0 }}
               >
@@ -752,7 +784,7 @@ export default function Home() {
 
             {/* STATE 1: LANDING STATE */}
             {!isChatCollapsed && uiState === 'landing' && (
-              <div className="h-full flex flex-col items-center justify-center p-6 relative">
+              <div className="h-full flex flex-col items-center justify-center p-6">
                 <div className="w-full max-w-[800px]">
                   {/* Hero Section */}
                   <motion.div
@@ -775,18 +807,19 @@ export default function Home() {
                     />
                   </motion.div>
 
-                  {/* Prompt Input - Entrance animation + transition animation */}
+                  {/* Prompt Input — entrance animation only; docking uses a fixed overlay */}
                   <motion.div
+                    ref={landingInputRef}
                     className="mt-8"
                     initial={{ opacity: 0, y: 16, scale: 0.98 }}
                     animate={{
-                      opacity: 1,
-                      y: isTransitioning ? 'calc(50vh - 120px)' : 0,
+                      opacity: isTransitioning ? 0 : 1,
+                      y: 0,
                       scale: 1,
                     }}
                     transition={
                       isTransitioning
-                        ? { duration: 1.2, delay: 1.0, ease: [0.4, 0, 0.2, 1] }
+                        ? { duration: 0 }
                         : introHasPlayed
                         ? { duration: 0.35, delay: 0.05, ease: [0.16, 1, 0.3, 1] }
                         : { duration: 0.7, delay: 2.55, ease: [0.16, 1, 0.3, 1] }
@@ -835,8 +868,8 @@ export default function Home() {
             {!isChatCollapsed && uiState === 'conversation' && (
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                animate={{ opacity: dockPhase === 'sliding' ? 0 : 1 }}
+                transition={{ duration: dockPhase === 'locking' ? 0.3 : 0.4, ease: [0.4, 0, 0.2, 1] }}
                 className="h-full flex flex-col"
               >
                 {/* Header with action buttons */}
@@ -934,7 +967,7 @@ export default function Home() {
                     {/* Breaker line */}
                     <div className="border-t border-border mb-6"></div>
 
-                    <div>
+                    <div ref={conversationFooterInputRef}>
                       <PromptInput onSubmit={handleSubmit} autoFocus={true} />
                     </div>
                   </div>
@@ -949,7 +982,7 @@ export default function Home() {
         </section>}
       </div>
 
-      {/* Theme Toast Notification */}
+{/* Theme Toast Notification */}
       <ThemeToast
         themeName={currentThemeName}
         isVisible={showThemeToast}
@@ -997,6 +1030,31 @@ export default function Home() {
           <TextArea label="Current Medications" name="medications" rows={3} />
           <TextArea label="Notes" name="notes" rows={3} />
         </PopOutForm>
+      )}
+
+      {/* Docking animation overlay — fixed position, outside all clipping containers */}
+      {dockGeometry && (dockPhase === 'sliding' || dockPhase === 'locking') && (
+        <motion.div
+          initial={{ top: dockGeometry.startTop, opacity: 1 }}
+          animate={{
+            top: dockGeometry.endTop,
+            opacity: dockPhase === 'locking' ? 0 : 1,
+          }}
+          transition={
+            dockPhase === 'locking'
+              ? { duration: 0.25, ease: [0.4, 0, 0.2, 1] }
+              : { top: { duration: 1.1, ease: [0.4, 0, 0.2, 1] }, opacity: { duration: 0 } }
+          }
+          style={{
+            position: 'fixed',
+            left: dockGeometry.startLeft,
+            width: dockGeometry.startWidth,
+            zIndex: 9999,
+            pointerEvents: 'none',
+          }}
+        >
+          <PromptInput />
+        </motion.div>
       )}
     </main>
   );
