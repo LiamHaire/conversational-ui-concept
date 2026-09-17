@@ -18,6 +18,7 @@ import {
   ReopenPromptCard,
   PatientCard,
   LineGraphCard,
+  FileCard,
 } from '@/components/ui/AdaptiveCards';
 import type { CardLayoutType } from '@/lib/adaptiveCardSelector';
 
@@ -45,6 +46,7 @@ const cardComponents: Record<string, React.ComponentType<any>> = {
   'reopen-prompt': ReopenPromptCard,
   'patient-card': PatientCard,
   'line-graph': LineGraphCard,
+  'file-card': FileCard,
 };
 
 export function AdaptiveCardRenderer({

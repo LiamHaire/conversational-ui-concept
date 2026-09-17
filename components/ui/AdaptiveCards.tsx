@@ -9,6 +9,7 @@ export { ReportListCard } from './AdaptiveCards/ReportListCard';
 export { ReopenPromptCard } from './AdaptiveCards/ReopenPromptCard';
 export { PatientCard } from './AdaptiveCards/PatientCard';
 export { LineGraphCard } from './AdaptiveCards/LineGraphCard';
+export { FileCard } from './AdaptiveCards/FileCard';
 
 // Base skeleton animation
 const shimmer = {

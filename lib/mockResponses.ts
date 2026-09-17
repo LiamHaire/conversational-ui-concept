@@ -282,6 +282,26 @@ export function getMockResponse(userMessage: string, gameNodeId?: string): MockR
     };
   }
 
+  // Priority 0b: Check for file card request
+  if (userMessage.toLowerCase().includes('create a document')) {
+    return {
+      content: "Here's the document you requested.",
+      delay: 800,
+      adaptiveCards: [
+        {
+          id: 'file-card-1',
+          type: 'file-card',
+          data: {
+            fileName: 'Q3 Clinical Report.pdf',
+            fileType: 'PDF Document',
+            fileSize: '3.1 MB',
+            fileDate: 'Modified today',
+          },
+        },
+      ],
+    };
+  }
+
   // Priority 0b: Check for specific appointment request
   if (userMessage.toLowerCase().includes('show me my next appointment') ||
       userMessage.toLowerCase().includes('next appointment')) {
