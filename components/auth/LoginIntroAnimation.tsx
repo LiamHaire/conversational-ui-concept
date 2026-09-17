@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-// Same SVG dimensions as IntroAnimation — no sidebar offset (login is full-screen)
 const SCALE = 94 / 40;
 const SVG_W = Math.round(416 * SCALE); // 978
 const SVG_H = Math.round(80 * SCALE);  // 188
@@ -14,7 +13,6 @@ const BM_OFFSET_X = SVG_W / 2 - BM_CX; // 442 — centres brandmark regardless o
 
 const N_LETTERS = 11;
 const LETTER_ENTRY_DELAY = 0.05;
-const LETTER_EXIT_DELAY  = 0.04;
 
 const BM_PATHS = [
   { d: 'M2.88206 29.2418C3.58379 28.024 5.13796 27.6067 6.35339 28.3098C7.56882 29.0129 7.98525 30.5701 7.28352 31.788L4.74234 36.1981C4.04061 37.4159 2.48645 37.8331 1.27102 37.13C0.0555867 36.4269 -0.36085 34.8697 0.340879 33.6519L2.88206 29.2418Z', fill: '#F5BAA4' },
@@ -65,7 +63,7 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
       setTimeout(() => setPhase('shift'),      800),
       setTimeout(() => setPhase('wordmark'),   1050),
       setTimeout(() => setPhase('dismissing'), 2050),
-      setTimeout(() => setPhase('recenter'),   2800),
+      setTimeout(() => setPhase('recenter'),   2950),
       setTimeout(() => setPhase('pulse'),      3400),
       setTimeout(() => setPhase('exit'),       3950),
       setTimeout(() => onComplete(),           4250),
@@ -76,17 +74,17 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
 
   if (prefersReduced || done) return null;
 
-  const isWordmarkVisible = phase === 'shift' || phase === 'wordmark' || phase === 'dismissing';
-  const isLetterEntry    = phase === 'wordmark';
-  const isLetterExit     = phase === 'dismissing';
-  const isBrandmarkCentred = phase === 'brandmark' || phase === 'recenter' || phase === 'pulse' || phase === 'exit';
+  const isWordmarkVisible  = phase === 'shift' || phase === 'wordmark' || phase === 'dismissing';
+  const isLetterEntry      = phase === 'wordmark';
+  const isDismissing       = phase === 'dismissing';
+  const isBrandmarkCentred = phase === 'brandmark' || phase === 'dismissing' || phase === 'recenter' || phase === 'pulse' || phase === 'exit';
+  // Divider fades out after the wipe completes (~0.7s into dismissing)
+  const isDividerVisible   = isWordmarkVisible && !isDismissing;
   const isPulse = phase === 'pulse';
   const isExit  = phase === 'exit';
 
-  // Lock x — brandmark stays centred, no slide on exit
   const containerX = isBrandmarkCentred ? BM_OFFSET_X : 0;
 
-  // Pulse: single smooth scale up and back, then exit fades in place
   const markAnimate = isPulse
     ? { scale: [1, 1.25, 1] as number[], opacity: 1 }
     : isExit
@@ -99,139 +97,158 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
     ? { duration: 0.35, ease: [0.4, 0, 1, 1] as [number, number, number, number] }
     : { duration: 0.4, ease: EASE };
 
+  // Wipe clip in SVG space:
+  // The letters span x=85 to x=416 in the viewBox.
+  // To erase o→d (left→right), the visible window's LEFT edge sweeps from x=85 to x=416.
+  // We do this with a rect that has a fixed large width (covers to the right of the SVG)
+  // and animates its x from 85 (shows everything) to 416 (shows nothing).
+  // The clip shows content TO THE RIGHT of x — so as x increases, letters are hidden left-first.
+  // Duration + easing match the container x-slide so the divider appears to erase as it passes.
+  const wipeX = isDismissing ? 416 : isLetterEntry ? 85 : 416;
+  const wipeDuration = isDismissing ? 0.7 : 0;
+
   return (
-    // Transparent overlay — login background image shows through
     <motion.div
       className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden pointer-events-none"
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Circular pulse wave — emanates from brandmark centre on pulse phase */}
+      {/* Circular pulse wave */}
       {isPulse && (
         <motion.div
           className="absolute rounded-full pointer-events-none"
-          style={{
-            width: 80,
-            height: 80,
-            border: '2px solid rgba(241, 93, 34, 0.6)',
-          }}
+          style={{ width: 80, height: 80, border: '2px solid rgba(241, 93, 34, 0.6)' }}
           initial={{ scale: 0.8, opacity: 0.8 }}
           animate={{ scale: 5, opacity: 0 }}
           transition={{ duration: 0.6, ease: [0, 0, 0.2, 1] }}
         />
       )}
 
-      {/* X-shift: slides left to reveal wordmark, recentres */}
-      <motion.div
-        animate={{ x: containerX }}
-        transition={{ duration: 0.7, ease: EASE }}
-      >
-        {/* Pulse / fade layer — transformOrigin anchored to brandmark centre within SVG */}
-        <motion.div
-          animate={markAnimate}
-          transition={markTransition}
-          style={{ transformOrigin: `${BM_CX}px 50%` }}
+      {/* Shared anchor — both layers are absolutely positioned inside this so they
+          share the same coordinate system. The outer flex centres this wrapper. */}
+      <div style={{ position: 'relative', width: SVG_W, height: SVG_H, flexShrink: 0 }}>
+
+        {/* LAYER 1 — stationary letters, never translates.
+            Clip left-edge sweeps x=85→416 during dismissing, erasing o first. */}
+        <svg
+          width={SVG_W}
+          height={SVG_H}
+          viewBox="0 0 416 80"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ position: 'absolute', top: 0, left: 0 }}
         >
-          <svg
-            width={SVG_W}
-            height={SVG_H}
-            viewBox="0 0 416 80"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              {[...Array(12)].map((_, i) => (
-                <linearGradient
-                  key={i}
-                  id={`li-g${i}`}
-                  x1={i === 0 ? '196.5' : '85.364'}
-                  y1={i === 0 ? '23' : '40'}
-                  x2={i === 0 ? '212' : '415.636'}
-                  y2={i === 0 ? '63.5' : '40'}
-                  gradientUnits="userSpaceOnUse"
-                >
-                  {i === 0 ? (
-                    <>
-                      <stop offset="0.326249" stopColor="#862C09" />
-                      <stop offset="1" stopColor="#F15D22" />
-                    </>
-                  ) : (
-                    <>
-                      <stop stopColor="#F68E1E" />
-                      <stop offset="0.886575" stopColor="#F15D22" />
-                    </>
-                  )}
-                </linearGradient>
-              ))}
-            </defs>
-
-            {/* Brandmark bars — stagger in on mount */}
-            {BM_PATHS.map((p, i) => (
-              <motion.path
+          <defs>
+            {[...Array(12)].map((_, i) => (
+              <linearGradient
                 key={i}
-                d={p.d}
-                fill={p.fill}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
-                transition={{ duration: 0.38, delay: 0.08 + i * 0.055, ease: EASE }}
-              />
+                id={`li-g${i}`}
+                x1={i === 0 ? '196.5' : '85.364'}
+                y1={i === 0 ? '23' : '40'}
+                x2={i === 0 ? '212' : '415.636'}
+                y2={i === 0 ? '63.5' : '40'}
+                gradientUnits="userSpaceOnUse"
+              >
+                {i === 0 ? (
+                  <>
+                    <stop offset="0.326249" stopColor="#862C09" />
+                    <stop offset="1" stopColor="#F15D22" />
+                  </>
+                ) : (
+                  <>
+                    <stop stopColor="#F68E1E" />
+                    <stop offset="0.886575" stopColor="#F15D22" />
+                  </>
+                )}
+              </linearGradient>
             ))}
+            {/* x sweeps 85→416: reveals nothing to the right of x=416, erasing left-first */}
+            <clipPath id="li-wipe">
+              <motion.rect
+                y={0} height={80} width={800}
+                initial={{ x: 416 }}
+                animate={{ x: wipeX }}
+                transition={{ duration: wipeDuration, ease: EASE }}
+              />
+            </clipPath>
+          </defs>
 
-            {/* Divider line */}
-            <motion.rect
-              x={64} y={0} width={4} height={80} rx={2} fill="#F15D22"
-              initial={{ opacity: 0, scaleY: 0 }}
-              animate={{
-                opacity: isWordmarkVisible ? 1 : 0,
-                scaleY: isWordmarkVisible ? 1 : 0,
-              }}
-              style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
-              transition={{ duration: 0.3, delay: isWordmarkVisible ? 0.05 : 0, ease: EASE }}
-            />
-
-            {/* Letters — stagger in left-to-right, out right-to-left */}
+          <g clipPath="url(#li-wipe)">
             {LETTER_GROUPS.map((group, gi) => {
               const entryDelay = gi * LETTER_ENTRY_DELAY;
-              const exitDelay  = (N_LETTERS - 1 - gi) * LETTER_EXIT_DELAY;
-              const visible = isLetterEntry;
               return (
                 <motion.g
                   key={group.key}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{
-                    opacity: visible ? 1 : 0,
-                    y: visible ? 0 : isLetterExit ? -5 : 6,
+                    opacity: isLetterEntry || isDismissing ? 1 : 0,
+                    y: isLetterEntry || isDismissing ? 0 : 6,
                   }}
                   transition={{
-                    duration: 0.28,
-                    delay: isLetterEntry ? entryDelay : isLetterExit ? exitDelay : 0,
+                    duration: isLetterEntry ? 0.28 : 0,
+                    delay: isLetterEntry ? entryDelay : 0,
                     ease: EASE,
                   }}
                 >
                   {group.paths.map((p, pi) => (
                     <g key={pi}>
-                      <path
-                        d={p.d}
-                        fill="#F15D22"
-                        fillRule={p.fillRule ?? 'nonzero'}
-                        clipRule={p.fillRule ?? 'nonzero'}
-                      />
-                      <path
-                        d={p.d}
-                        fill={`url(#li-g${p.gradIdx})`}
-                        fillOpacity={0.8}
-                        fillRule={p.fillRule ?? 'nonzero'}
-                        clipRule={p.fillRule ?? 'nonzero'}
-                      />
+                      <path d={p.d} fill="#F15D22" fillRule={p.fillRule ?? 'nonzero'} clipRule={p.fillRule ?? 'nonzero'} />
+                      <path d={p.d} fill={`url(#li-g${p.gradIdx})`} fillOpacity={0.8} fillRule={p.fillRule ?? 'nonzero'} clipRule={p.fillRule ?? 'nonzero'} />
                     </g>
                   ))}
                 </motion.g>
               );
             })}
-          </svg>
+          </g>
+        </svg>
+
+        {/* LAYER 2 — sliding brandmark + divider, no letters.
+            Starts at x=0 (shifted left so wordmark is visible in layer 1),
+            slides to x=BM_OFFSET_X (centred) during dismissing. */}
+        <motion.div
+          style={{ position: 'absolute', top: 0, left: 0 }}
+          animate={{ x: containerX }}
+          transition={{ duration: 0.7, ease: EASE }}
+        >
+          <motion.div
+            animate={markAnimate}
+            transition={markTransition}
+            style={{ transformOrigin: `${BM_CX}px 50%` }}
+          >
+            <svg
+              width={SVG_W}
+              height={SVG_H}
+              viewBox="0 0 416 80"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {BM_PATHS.map((p, i) => (
+                <motion.path
+                  key={i}
+                  d={p.d}
+                  fill={p.fill}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+                  transition={{ duration: 0.38, delay: 0.08 + i * 0.055, ease: EASE }}
+                />
+              ))}
+
+              <motion.rect
+                x={64} y={0} width={4} height={80} rx={2} fill="#F15D22"
+                initial={{ opacity: 0, scaleY: 0 }}
+                animate={{
+                  opacity: isDividerVisible ? 1 : 0,
+                  scaleY: isDismissing ? 1 : isDividerVisible ? 1 : 0,
+                }}
+                style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+                transition={{ duration: 0.3, delay: isDismissing ? 0.2 : isWordmarkVisible ? 0.05 : 0, ease: EASE }}
+              />
+            </svg>
+          </motion.div>
         </motion.div>
-      </motion.div>
+
+      </div>
     </motion.div>
   );
 }
