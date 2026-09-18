@@ -95,15 +95,10 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
     ? { duration: 0.35, ease: [0.4, 0, 1, 1] as [number, number, number, number] }
     : { duration: 0.4, ease: EASE };
 
-  // Wipe clip in SVG space:
-  // The letters span x=85 to x=416 in the viewBox.
-  // To erase o→d (left→right), the visible window's LEFT edge sweeps from x=85 to x=416.
-  // We do this with a rect that has a fixed large width (covers to the right of the SVG)
-  // and animates its x from 85 (shows everything) to 416 (shows nothing).
-  // The clip shows content TO THE RIGHT of x — so as x increases, letters are hidden left-first.
-  // Duration + easing match the container x-slide so the divider appears to erase as it passes.
-  const wipeX = isDismissing ? 416 : isLetterEntry ? 60 : 416;
-  const wipeDuration = isDismissing ? 0.7 : 0;
+  // Each letter fades out left-to-right over the same 0.7s window as the old wipe.
+  // 11 letters, stagger = 0.7 / 10 = 0.07s apart, each fade = 0.12s.
+  const DISMISS_STAGGER = 0.045;
+  const DISMISS_FADE    = 0.08;
 
   return (
     <motion.div
@@ -160,31 +155,23 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
                 )}
               </linearGradient>
             ))}
-            {/* x sweeps 85→416: reveals nothing to the right of x=416, erasing left-first */}
-            <clipPath id="li-wipe">
-              <motion.rect
-                y={0} height={80} width={800}
-                initial={{ x: 416 }}
-                animate={{ x: wipeX }}
-                transition={{ duration: wipeDuration, ease: EASE }}
-              />
-            </clipPath>
           </defs>
 
-          <g clipPath="url(#li-wipe)" transform="translate(-25, 0)">
+          <g transform="translate(-25, 0)">
             {LETTER_GROUPS.map((group, gi) => {
-              const entryDelay = gi * LETTER_ENTRY_DELAY;
+              const entryDelay   = gi * LETTER_ENTRY_DELAY;
+              const dismissDelay = gi * DISMISS_STAGGER;
               return (
                 <motion.g
                   key={group.key}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{
-                    opacity: isLetterEntry || isDismissing ? 1 : 0,
+                    opacity: isDismissing ? 0 : isLetterEntry ? 1 : 0,
                     y: isLetterEntry || isDismissing ? 0 : 6,
                   }}
                   transition={{
-                    duration: isLetterEntry ? 0.28 : 0,
-                    delay: isLetterEntry ? entryDelay : 0,
+                    duration: isDismissing ? DISMISS_FADE : isLetterEntry ? 0.28 : 0,
+                    delay: isDismissing ? dismissDelay : isLetterEntry ? entryDelay : 0,
                     ease: EASE,
                   }}
                 >
