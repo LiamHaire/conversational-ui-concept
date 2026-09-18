@@ -78,8 +78,6 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
   const isLetterEntry      = phase === 'wordmark';
   const isDismissing       = phase === 'dismissing';
   const isBrandmarkCentred = phase === 'brandmark' || phase === 'dismissing' || phase === 'recenter' || phase === 'pulse' || phase === 'exit';
-  // Divider fades out after the wipe completes (~0.7s into dismissing)
-  const isDividerVisible   = isWordmarkVisible && !isDismissing;
   const isPulse = phase === 'pulse';
   const isExit  = phase === 'exit';
 
@@ -104,7 +102,7 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
   // and animates its x from 85 (shows everything) to 416 (shows nothing).
   // The clip shows content TO THE RIGHT of x — so as x increases, letters are hidden left-first.
   // Duration + easing match the container x-slide so the divider appears to erase as it passes.
-  const wipeX = isDismissing ? 416 : isLetterEntry ? 85 : 416;
+  const wipeX = isDismissing ? 391 : isLetterEntry ? 60 : 391;
   const wipeDuration = isDismissing ? 0.7 : 0;
 
   return (
@@ -166,14 +164,14 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
             <clipPath id="li-wipe">
               <motion.rect
                 y={0} height={80} width={800}
-                initial={{ x: 416 }}
+                initial={{ x: 391 }}
                 animate={{ x: wipeX }}
                 transition={{ duration: wipeDuration, ease: EASE }}
               />
             </clipPath>
           </defs>
 
-          <g clipPath="url(#li-wipe)">
+          <g clipPath="url(#li-wipe)" transform="translate(-25, 0)">
             {LETTER_GROUPS.map((group, gi) => {
               const entryDelay = gi * LETTER_ENTRY_DELAY;
               return (
@@ -235,16 +233,6 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
                 />
               ))}
 
-              <motion.rect
-                x={64} y={0} width={4} height={80} rx={2} fill="#F15D22"
-                initial={{ opacity: 0, scaleY: 0 }}
-                animate={{
-                  opacity: isDividerVisible ? 1 : 0,
-                  scaleY: isDismissing ? 1 : isDividerVisible ? 1 : 0,
-                }}
-                style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
-                transition={{ duration: 0.3, delay: isDismissing ? 0.2 : isWordmarkVisible ? 0.05 : 0, ease: EASE }}
-              />
             </svg>
           </motion.div>
         </motion.div>
