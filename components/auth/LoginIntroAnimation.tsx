@@ -203,10 +203,11 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
         </svg>
 
         {/* LAYER 2 — sliding brandmark + divider, no letters.
-            Starts at x=0 (shifted left so wordmark is visible in layer 1),
-            slides to x=BM_OFFSET_X (centred) during dismissing. */}
+            Starts centred (x=BM_OFFSET_X) so the initial reveal has no slide,
+            then slides left (x=0) during shift to expose the wordmark. */}
         <motion.div
           style={{ position: 'absolute', top: 0, left: 0 }}
+          initial={{ x: BM_OFFSET_X }}
           animate={{ x: containerX }}
           transition={{ duration: 0.7, ease: EASE }}
         >

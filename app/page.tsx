@@ -402,13 +402,12 @@ export default function Home() {
     setMessages((prev) => [...prev, userMessage]);
   };
 
-  const handleTileClick = (tile: { id: string; type: 'task' | 'appointment' | 'report'; count: number; label: string }) => {
+  const handleTileClick = (tile: { id: string; type: 'appointment' | 'report'; count: number; label: string }) => {
     // Trigger the docking animation (same as handleSubmit)
     startDockingTransition();
 
     // Create user message based on tile
     const tileMessages: Record<string, string> = {
-      task: `Show me my ${tile.count} tasks due today`,
       appointment: `Show me my ${tile.count} appointments today`,
       report: `Show me my ${tile.count} reports scheduled for today`,
     };
@@ -437,24 +436,17 @@ export default function Home() {
 
     // Generate response based on tile type
     const responseMessages: Record<string, string> = {
-      task: `Here are your ${tile.count} outstanding tasks due today:`,
       appointment: `Here are your ${tile.count} appointments scheduled for today:`,
       report: `Here are your ${tile.count} reports scheduled for today:`,
     };
 
     const adaptiveCardTypes: Record<string, string> = {
-      task: 'task-list',
       appointment: 'appointment-list',
       report: 'report-list',
     };
 
     // Suggested actions for each tile type
     const suggestedActionsMap: Record<string, { id: string; text: string }[]> = {
-      task: [
-        { id: 'reschedule-tasks', text: 'Reschedule overdue tasks' },
-        { id: 'mark-complete', text: 'Mark first 3 as complete' },
-        { id: 'delegate-tasks', text: 'Suggest delegation options' },
-      ],
       appointment: [
         { id: 'prep-meetings', text: 'Prepare meeting briefs' },
         { id: 'send-reminders', text: 'Send reminders to attendees' },

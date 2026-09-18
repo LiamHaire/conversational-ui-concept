@@ -44,7 +44,6 @@ const categoryKeywords: Record<QueryCategory, string[]> = {
     'all',
     'medication',
     'patient',
-    'task',
   ],
   schedule: [
     'calendar',
@@ -153,7 +152,6 @@ export function shouldShowMultipleCards(query: string): boolean {
     'appointments',
     'patients',
     'medications',
-    'tasks',
   ];
 
   const lowerQuery = query.toLowerCase();

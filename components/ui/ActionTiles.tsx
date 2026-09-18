@@ -8,11 +8,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { TaskIcon, AppointmentIcon, ReportIcon } from '@/components/icons';
+import { AppointmentIcon, ReportIcon } from '@/components/icons';
 
 interface ActionTile {
   id: string;
-  type: 'task' | 'appointment' | 'report';
+  type: 'appointment' | 'report';
   count: number;
   label: string;
 }
@@ -24,7 +24,6 @@ interface ActionTilesProps {
 }
 
 const DEFAULT_TILES: ActionTile[] = [
-  { id: '1', type: 'task', count: 2, label: 'tasks due today' },
   { id: '2', type: 'appointment', count: 8, label: 'appointments today' },
   { id: '3', type: 'report', count: 4, label: 'reports scheduled for today' },
 ];
@@ -45,7 +44,7 @@ interface ActionTileProps {
 }
 
 function ActionTile({ tile, onClick }: ActionTileProps) {
-  const Icon = tile.type === 'task' ? TaskIcon : tile.type === 'appointment' ? AppointmentIcon : ReportIcon;
+  const Icon = tile.type === 'appointment' ? AppointmentIcon : ReportIcon;
 
   const handleClick = () => {
     if (onClick) {

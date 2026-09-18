@@ -42,7 +42,6 @@ export { ThumbsDownIcon } from './ThumbsDownIcon';
 export { NewChatIcon } from './NewChatIcon';
 
 // Action tile icons
-export { TaskIcon } from './TaskIcon';
 export { AppointmentIcon } from './AppointmentIcon';
 export { ReportIcon } from './ReportIcon';
 export { PatientIcon } from './PatientIcon';
@@ -73,4 +72,3 @@ export { FolderIcon } from './FolderIcon';
 export { CalendarIcon } from './CalendarIcon';
 export { ReferralIcon } from './ReferralIcon';
 export { PillIcon } from './PillIcon';
-export { TaskListIcon } from './TaskListIcon';

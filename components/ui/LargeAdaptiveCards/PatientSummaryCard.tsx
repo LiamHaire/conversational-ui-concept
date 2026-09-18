@@ -10,7 +10,7 @@
 import { useState, useEffect, useRef, useMemo, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { PatientIcon, MoreVerticalIcon, ArrowRightIcon, TaskListIcon, ReferralIcon, PillIcon, CalendarIcon } from '@/components/icons';
+import { PatientIcon, MoreVerticalIcon, ArrowRightIcon, ReferralIcon, PillIcon, CalendarIcon } from '@/components/icons';
 import { ChevronRightIcon } from '@/components/ui/ChevronRightIcon';
 import { ACTIVE_PATIENT, PATIENT_HARPER, PATIENT_ELLISON, PATIENT_OKAFOR, type Patient } from '@/lib/patientData';
 import { calcComplexity, calcRisk } from '@/lib/clinicalCalculators';
@@ -1276,7 +1276,7 @@ function PatientTracker({ patientId, careMode }: { patientId: string; careMode?:
       {/* Icon buttons with badge counts — primary care only */}
       {careMode !== 'urgent' && (
         <>
-          <TrackerIconButton icon={TaskListIcon} label="Outstanding tasks" count={tracker.outstandingTasks} />
+          <TrackerIconButton icon={CalendarIcon} label="Outstanding items" count={tracker.outstandingTasks} />
           <TrackerIconButton icon={ReferralIcon} label="Open referrals" count={tracker.openReferrals} />
           <TrackerIconButton icon={PillIcon} label="Medication reviews due" count={tracker.medicationReviewsDue} />
         </>
