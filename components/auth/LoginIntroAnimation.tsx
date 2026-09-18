@@ -97,8 +97,8 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
 
   // Each letter fades out left-to-right over the same 0.7s window as the old wipe.
   // 11 letters, stagger = 0.7 / 10 = 0.07s apart, each fade = 0.12s.
-  const DISMISS_STAGGER = 0.045;
-  const DISMISS_FADE    = 0.08;
+  const DISMISS_STAGGER = 0.022;
+  const DISMISS_FADE    = 0.05;
 
   return (
     <motion.div
