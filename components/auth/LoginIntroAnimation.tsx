@@ -102,7 +102,7 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
   // and animates its x from 85 (shows everything) to 416 (shows nothing).
   // The clip shows content TO THE RIGHT of x — so as x increases, letters are hidden left-first.
   // Duration + easing match the container x-slide so the divider appears to erase as it passes.
-  const wipeX = isDismissing ? 391 : isLetterEntry ? 60 : 391;
+  const wipeX = isDismissing ? 416 : isLetterEntry ? 60 : 416;
   const wipeDuration = isDismissing ? 0.7 : 0;
 
   return (
@@ -164,7 +164,7 @@ export function LoginIntroAnimation({ onComplete }: LoginIntroAnimationProps) {
             <clipPath id="li-wipe">
               <motion.rect
                 y={0} height={80} width={800}
-                initial={{ x: 391 }}
+                initial={{ x: 416 }}
                 animate={{ x: wipeX }}
                 transition={{ duration: wipeDuration, ease: EASE }}
               />
